@@ -10,8 +10,8 @@ async function connectDB() {
         connection.on('connected', () => {
             console.log("Connect to DB")
         })
-        connection.on('error', () => {
-            console.log("Something to DB",error),
+        connection.on('error', (error) => {
+            console.log("Something to DB",error)
         })
     } catch (error) {
         console.log("Something wrong Connect to DB", error)
