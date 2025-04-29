@@ -1,53 +1,38 @@
+const UserModel = require('../models/UserModel');
+const bcryptjs = require('bcryptjs');
 
-const UserModel = require('../models/UserModel')
-const bcryptjs = require('bcryptjs')
-
-
-
-async function registerUser() {
-
+async function registerUser(req, res) {
     try {
-        const { name, email, password, profile_pic } = Request.body
+        const { name, email, password, profile_pic } = req.body;
 
-        const checkEmail = await UserModel.findOne({ email }) //{name,email} //null
-
+        const checkEmail = await UserModel.findOne({ email });
 
         if (checkEmail) {
-            return response.status(400).json({
+            return res.status(400).json({
                 message: "Already exist",
                 error: true
-            })
+            });
         }
 
-        //password into hashed
+        const salt = await bcryptjs.genSalt(10);
+        const hashpassword = await bcryptjs.hash(password, salt);
 
-        const salt = await bcryptjs.genSalt(10)
-        const hashpassword = await bcryptjs.hash(password, salt)
+        const payload = { name, email, profile_pic, password: hashpassword };
 
-        const payload = {
+        const user = new UserModel(payload);
+        const userSave = await user.save();
 
-            name, email, profile_pic, password: hashpassword
-        }
-const user=new UserModel(payload)
-
-const userSave=await user.save()
-return response.status(201).json({
-    message:"User succssfully Created",
-    data:userSave,
-    success:true
-
-})
-    }
-    catch (error) {
-
-        return Response.status(500).json({
-
+        return res.status(201).json({
+            message: "User successfully created",
+            data: userSave,
+            success: true
+        });
+    } catch (error) {
+        return res.status(500).json({
             message: error.message || error,
             error: true
-        })
-
+        });
     }
 }
 
-
-module.exports=registerUser
+module.exports = registerUser;
